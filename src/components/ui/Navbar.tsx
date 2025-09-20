@@ -17,10 +17,10 @@ import { Zap } from 'lucide-react';
 type MenuLink = { label: string; href: string };
 
 const MAIN_LINKS: MenuLink[] = [
-  { label: 'ฟีเจอร์', href: '#' },
-  { label: 'ราคาแพ็กเกจ', href: '#' },
-  { label: 'วิธีใช้งาน', href: '#' },
-  { label: 'ติดต่อเรา', href: '#' },
+  { label: 'ฟีเจอร์', href: '#services' },
+  { label: 'ราคาแพ็กเกจ', href: '#packages' },
+  { label: 'วิธีใช้งาน', href: '#usage' },
+  { label: 'ติดต่อเรา', href: '#contracts' },
 ];
 
 export default function Navbars() {
@@ -29,7 +29,7 @@ export default function Navbars() {
   return (
     <Navbar
       onMenuOpenChange={setIsMenuOpen}
-      className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-yellow-200"
+      className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200"
       maxWidth="xl"
     >
       {/* Left: brand + menu toggle */}
@@ -38,12 +38,14 @@ export default function Navbars() {
           aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           className="md:hidden"
         />
-        <NavbarBrand className="gap-2">
-          <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center">
-            <Zap className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xl font-bold text-gray-900">ZEUS.AI</span>
-        </NavbarBrand>
+        <Link href='/landing'>
+          <NavbarBrand className="gap-2">
+            <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center">
+              <Zap className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xl font-bold text-gray-900">ZEUS.AI</span>
+          </NavbarBrand>
+        </Link>
       </NavbarContent>
 
       {/* Center: desktop links */}

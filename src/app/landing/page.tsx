@@ -5,6 +5,7 @@ import ServiceCard from "./_components/ServiceCard"
 import PackageCard from "./_components/PackageCard";
 import CommentCard from "./_components/CommentCard";
 import Footer from "./_components/Footer";
+import Link from "next/link";
 
 export default function Landing() {
     const services = [
@@ -90,9 +91,9 @@ export default function Landing() {
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-white">
+        <div className="min-h-screen">
             {/* Hero Section */}
-            <section className="min-h-dvh flex items-center bg-gradient-to-br from-yellow-50 to-white">
+            <section className="min-h-dvh flex items-center">
                 <div className="container mx-auto px-4">
                     <div className="grid lg:grid-cols-2 gap-12 items-center">
                         <div className="space-y-6">
@@ -120,7 +121,7 @@ export default function Landing() {
             </section>
 
             {/* Services Section */}
-            <section className="min-h-dvh flex items-center bg-white">
+            <section className="min-h-dvh flex items-center bg-white" id="services">
                 <div className="container mx-auto px-4">
                     <h1 className="text-4xl font-bold text-center text-gray-900 mb-12">ศักยภาพ AI</h1>
                     <h2 className="text-2xl font-bold text-center text-gray-900 mb-12">ขับเคลื่อนธุรกิจด้วยเอเจนต์อัจฉริยะที่ทำงานได้ไม่มีหยุด เพื่อยกระดับการดำเนินงานของคุณ</h2>
@@ -152,7 +153,7 @@ export default function Landing() {
             </section>
 
             {/* Workflow Section */}
-            <section className="min-h-dvh flex items-center bg-yellow-50">
+            <section className="min-h-dvh flex items-center bg-yellow-50" id="usage">
                 <div className="container mx-auto px-4">
                     <div className="container mx-auto px-4">
                         <div className="text-center mb-12">
@@ -211,7 +212,7 @@ export default function Landing() {
             </section>
 
             {/* Package Grid */}
-            <section className="container mx-auto px-4 py-16">
+            <section className="container mx-auto px-4 py-16" id="packages">
                 <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
                     ราคาแพ็กเกจ
                 </h2>
@@ -232,9 +233,11 @@ export default function Landing() {
                 </div>
 
                 <div className="mt-5 w-full max-w-6xl mx-auto">
-                    <Button className="w-full bg-yellow-400">
-                        ดูแพ็กเกจอื่นๆ
-                    </Button>
+                    <Link href="/packages">
+                        <Button className="w-full bg-yellow-400">
+                            ดูแพ็กเกจอื่นๆ
+                        </Button>
+                    </Link>
                 </div>
             </section>
 
@@ -280,7 +283,9 @@ export default function Landing() {
             </section>
 
             {/* Footer */}
-            <Footer />
+            <div id="contracts">
+                <Footer />
+            </div>
         </div>
     )
 }
