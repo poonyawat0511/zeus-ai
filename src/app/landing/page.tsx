@@ -103,9 +103,11 @@ export default function Landing() {
                                 ผู้นำการให้บริการ AI Agent-as-a-Service ในเอเชียตะวันออกเฉียงใต้ ที่ช่วยให้องค์กรใช้ศักยภาพของ AI ในการสร้างคุณค่าและขับเคลื่อนธุรกิจสู่ความยั่งยืน
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <Button size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-white">
-                                    ทดลองใช้งานฟรี
-                                </Button>
+                                <Link href="/chat">
+                                    <Button size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-white">
+                                        ทดลองใช้งานฟรี
+                                    </Button>
+                                </Link>
                             </div>
                             <p className="text-sm text-gray-500">
                                 หรือ <span className="text-yellow-600 font-medium">ทดลองใช้งานกับข้อมูลของคุณ</span> ฟรี!
@@ -274,9 +276,9 @@ export default function Landing() {
                             </h2>
                         </CardHeader>
                         <CardBody>
-                            <Button className="bg-yellow-400">
-                                ทดลองใช้งานฟรี
-                            </Button>
+                            <Link href="/chat" className="block w-full">
+                                <Button className="w-full bg-yellow-400">ทดลองใช้งานฟรี</Button>
+                            </Link>
                         </CardBody>
                     </Card>
                 </div>
