@@ -1,4 +1,3 @@
-// tailwind.config.js
 const { heroui } = require("@heroui/theme");
 
 /** @type {import('tailwindcss').Config} */
@@ -16,7 +15,11 @@ module.exports = {
     "./content/**/*.{md,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ["var(--font-ibm-plex-sans-thai)", "sans-serif"],
+      },
+    },
   },
   plugins: [heroui()],
 };
