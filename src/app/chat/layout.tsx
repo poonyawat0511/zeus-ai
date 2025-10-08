@@ -39,10 +39,9 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     ])
     const [inputValue, setInputValue] = useState("")
     const [isTyping, setIsTyping] = useState(false)
-    const [navH, setNavH] = useState(0)      // navbar height
-    const [inputH, setInputH] = useState(96) // chat input height (fixed)
+    const [navH, setNavH] = useState(0)      
+    const [inputH, setInputH] = useState(96) 
 
-    // วัดความสูง header จริง ๆ และอัปเดตเมื่อรีไซซ์
     useEffect(() => {
         const getNavH = () => {
             const header = document.querySelector("header") as HTMLElement | null
@@ -60,7 +59,6 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         setInputValue("");
         setIsTyping(true);
 
-        // เตรียม assistant เปล่าไว้ต่อท้าย
         const assistantId = (Date.now() + 1).toString();
         setMessages((p) => [...p, { id: assistantId, content: "", sender: "assistant", timestamp: new Date() }]);
 
@@ -70,7 +68,30 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ messages: toOpenAIMessages([...messages, userMessage]) }),
             });
-            if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+
+            const contentType = res.headers.get("content-type") || "";
+
+            if (!res.ok) {
+                const errText = await res.text().catch(() => "");
+                setMessages((p) =>
+                    p.map((m) => (m.id === assistantId
+                        ? { ...m, content: `❌ HTTP ${res.status}${errText ? `: ${errText}` : ""}` }
+                        : m))
+                );
+                setIsTyping(false);
+                return; 
+            }
+
+            if (!contentType.includes("text/event-stream") || !res.body) {
+                const txt = await res.text().catch(() => "");
+                setMessages((p) =>
+                    p.map((m) => (m.id === assistantId
+                        ? { ...m, content: txt || "⚠️ ไม่ได้รับสตรีมจากเซิร์ฟเวอร์" }
+                        : m))
+                );
+                setIsTyping(false);
+                return;
+            }
 
             const reader = res.body.getReader();
             const decoder = new TextDecoder("utf-8");
