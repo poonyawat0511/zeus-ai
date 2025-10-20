@@ -15,6 +15,7 @@ type PackageCardProps = {
     badge?: string;
     icon?: React.ReactNode;
     className?: string;
+    onAction?: () => void;
 };
 
 export default function PackageCard({
@@ -28,17 +29,21 @@ export default function PackageCard({
     badge,
     icon,
     className = "",
+    onAction,
 }: PackageCardProps) {
+    const [priceMain, priceUnit] = price.includes("/")
+        ? [price.split("/")[0].trim(), price.split("/")[1].trim()]
+        : [price.trim(), ""];
+
     return (
         <Card
             className={[
-                // พื้นขาว เงานุ่ม สไตล์การ์ดในภาพ
                 "bg-white text-gray-900 border border-gray-200 shadow-[0_10px_25px_rgba(0,0,0,0.06)]",
                 "rounded-2xl overflow-hidden relative",
                 className,
             ].join(" ")}
         >
-            {/* Badge มุมขวาบน */}
+            {/* Badge (top-right) */}
             {badge ? (
                 <div className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold bg-amber-400 text-black shadow">
                     {badge}
@@ -46,7 +51,7 @@ export default function PackageCard({
             ) : null}
 
             <CardBody className="p-6 flex flex-col gap-4">
-                {/* หัวข้อ + ไอคอนเล็ก (ถ้ามี) */}
+                {/* Header + optional icon */}
                 <div className="flex items-start gap-3">
                     {icon ? (
                         <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
@@ -55,25 +60,19 @@ export default function PackageCard({
                     ) : null}
                     <div>
                         <h3 className="text-lg font-extrabold leading-snug">{title}</h3>
-                        {subtitle ? (
-                            <p className="text-sm text-gray-600">{subtitle}</p>
-                        ) : null}
+                        {subtitle ? <p className="text-sm text-gray-600">{subtitle}</p> : null}
                     </div>
                 </div>
 
-                {/* ราคา */}
+                {/* Price */}
                 <div>
                     <div className="text-3xl font-black tracking-tight">
-                        {price.split("/")[0].trim()}
+                        {priceMain}
                     </div>
-                    {price.includes("/") ? (
-                        <div className="text-sm text-gray-600">
-                            / {price.split("/")[1].trim()}
-                        </div>
-                    ) : null}
+                    {priceUnit ? <div className="text-sm text-gray-600">/ {priceUnit}</div> : null}
                 </div>
 
-                {/* รายการคุณสมบัติ */}
+                {/* Features */}
                 <div className="mt-1 space-y-3">
                     {features.map((f, i) => (
                         <div key={i} className="flex items-start gap-2">
@@ -94,17 +93,26 @@ export default function PackageCard({
 
                 {/* CTA */}
                 <div className="mt-2">
-                    <Button
-                        as={Link}
-                        href={href}
-                        radius="lg"
-                        size="lg"
-                        className="w-full font-semibold text-gray-900
-                       bg-gradient-to-r from-amber-300 to-orange-400
-                       shadow-md hover:brightness-105 active:brightness-95"
-                    >
-                        {ctaText}
-                    </Button>
+                    {onAction ? (
+                        <Button
+                            radius="lg"
+                            size="lg"
+                            className="w-full font-semibold text-gray-900 bg-gradient-to-r from-amber-300 to-orange-400 shadow-md hover:brightness-105 active:brightness-95"
+                            onPress={onAction}
+                        >
+                            {ctaText}
+                        </Button>
+                    ) : (
+                        <Button
+                            as={Link}
+                            href={href}
+                            radius="lg"
+                            size="lg"
+                            className="w-full font-semibold text-gray-900 bg-gradient-to-r from-amber-300 to-orange-400 shadow-md hover:brightness-105 active:brightness-95"
+                        >
+                            {ctaText}
+                        </Button>
+                    )}
                 </div>
             </CardBody>
         </Card>

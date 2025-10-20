@@ -1,9 +1,17 @@
 'use client'
 import { MessageSquare } from "lucide-react";
 import PackageCard from "./_components/PackageCard";
-
+import PaymentCard from "@/components/PaymentCard";
+import { useState } from "react";
 
 export default function PackagePage() {
+    const [isPayOpen, setIsPayOpen] = useState(false)
+    const [selected, setSelected] = useState<{ title: string; price: string } | null>(null)
+    const openPayment = (p: { title: string; price: string }) => {
+        setSelected({ title: p.title, price: p.price })
+        setIsPayOpen(true)
+    }
+
     const packages = [
         {
             icon: <MessageSquare className="w-5 h-5 text-amber-500" />,
@@ -80,6 +88,7 @@ export default function PackagePage() {
         },
 
     ];
+
     return (
         <div className="min-h-screen">
 
@@ -98,10 +107,22 @@ export default function PackagePage() {
                             features={p.features}
                             icon={p.icon}
                             href={p.href}
+                            onAction={() => openPayment(p)}
                         />
                     ))}
                 </div>
             </section>
+            <PaymentCard
+                hideTrigger
+                open={isPayOpen}
+                onOpenChange={setIsPayOpen}
+                requiredment={selected ? `Package: ${selected.title}\nPrice: ${selected.price}\n\nMy requirements:\n` : ""}
+                planTitle={selected?.title}
+                planPrice={selected?.price}
+                onComplete={(data) => {
+                    console.log("Payment data:", data)
+                }}
+            />
         </div>
     )
 }

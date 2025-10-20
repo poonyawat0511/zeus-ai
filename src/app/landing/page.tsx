@@ -54,7 +54,7 @@ export default function Landing() {
         "Basic analytics",
       ],
       note: "Email support",
-      href: "#",
+      href: "/packages",
     },
     {
       icon: <Target className="w-5 h-5 text-yellow-400" />,
@@ -68,7 +68,7 @@ export default function Landing() {
       ],
       note: "Email + Chat support",
       badge: "แนะนำ",
-      href: "#",
+      href: "/packages",
     },
     {
       icon: <BarChart3 className="w-5 h-5 text-yellow-400" />,
@@ -82,7 +82,7 @@ export default function Landing() {
         "Custom knowledge base",
       ],
       note: "Priority support",
-      href: "#",
+      href: "/packages",
     },
     {
       icon: <Users className="w-5 h-5 text-yellow-400" />,
@@ -96,7 +96,7 @@ export default function Landing() {
         "ปรับแต่ง Workflow/Agent ขั้นสูง",
       ],
       note: "Dedicated support",
-      href: "#",
+      href: "/packages",
     },
   ];
 
