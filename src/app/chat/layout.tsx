@@ -1,6 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react"
+import { usePathname } from "next/navigation"
 import ChatBar, { type ConversationItem } from "./_components/Chat-bar"
 import ChatInput from "./_components/Chat-input"
 
@@ -19,12 +20,8 @@ type ChatContextType = {
   inputValue: string
   setInputValue: (v: string) => void
   send: () => void
-
-  // Keep Tier for UI mock (optional to use)
   tier: Tier
   setTier: (t: Tier) => void
-
-  // Selected model (this now determines the route)
   model: string
   setModel: (m: string) => void
 }
@@ -36,41 +33,36 @@ export const useChatUI = () => {
   return ctx
 }
 
-// === Route mapping by model ===
-// old model → old route, new model(s) → new route
 const MODEL_TO_ROUTE: Record<string, "/api/chat" | "/api/chat/plus"> = {
-  "deepseek/deepseek-chat-v3.1": "/api/chat",        // Old model → old route
-  "openai/gpt-4o-mini": "/api/chat/plus",            // New model → new route
-  // add more mappings as needed
+  "deepseek/deepseek-chat-v3.1": "/api/chat",
+  "openai/gpt-4o-mini": "/api/chat/plus",
 }
 
-// helper: map state → OpenAI-style messages
 function toOpenAIMessages(messages: { sender: "user" | "assistant"; content: string }[]) {
-  return messages.map((m) => ({
-    role: m.sender === "user" ? "user" : "assistant",
-    content: m.content,
-  }))
+  return messages.map((m) => ({ role: m.sender === "user" ? "user" : "assistant", content: m.content }))
 }
 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
+  const inPlus = pathname === "/chat/plus"
+
   const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      content: "Hello! I'm your AI assistant. How can I help you today?",
-      sender: "assistant",
-      timestamp: new Date(),
-    },
+    { id: "1", content: "Hello! I'm your AI assistant. How can I help you today?", sender: "assistant", timestamp: new Date() },
   ])
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
 
-  // Layout helpers (for sticky header/input)
   const [navH, setNavH] = useState(0)
   const [inputH, setInputH] = useState(96)
 
-  // Mock plan + selected model (UI)
   const [tier, setTier] = useState<Tier>("plus")
   const [model, setModel] = useState<string>("deepseek/deepseek-chat-v3.1")
+
+  // NEW: attachments state
+  const [attachments, setAttachments] = useState<File[]>([])
+  const addAttachments = (files: File[]) => setAttachments((prev) => [...prev, ...files])
+  const removeAttachmentAt = (index: number) =>
+    setAttachments((prev) => prev.filter((_, i) => i !== index))
 
   useEffect(() => {
     const getNavH = () => {
@@ -82,101 +74,81 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     return () => window.removeEventListener("resize", getNavH)
   }, [])
 
-  const send = async () => {
-    if (!inputValue.trim()) return
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: inputValue,
-      sender: "user",
-      timestamp: new Date(),
+  const streamInto = async (res: Response, assistantId: string) => {
+    const ct = res.headers.get("content-type") || ""
+    if (!res.ok || !ct.includes("text/event-stream") || !res.body) {
+      const txt = await res.text().catch(() => "")
+      setMessages((p) => p.map((m) => (m.id === assistantId ? { ...m, content: txt || `❌ HTTP ${res.status}` } : m)))
+      return
     }
-    setMessages((p) => [...p, userMessage])
-    setInputValue("")
-    setIsTyping(true)
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder("utf-8")
+    let buffer = ""
+    while (true) {
+      const { value, done } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split("\n")
+      for (let i = 0; i < lines.length - 1; i++) {
+        const ln = lines[i].trim()
+        if (!ln.startsWith("data:")) continue
+        const payload = ln.slice(5).trim()
+        if (payload === "[DONE]") continue
+        try {
+          const json = JSON.parse(payload)
+          const delta: string = json.choices?.[0]?.delta?.content ?? ""
+          if (delta) {
+            setMessages((p) => p.map((m) => (m.id === assistantId ? { ...m, content: (m.content ?? "") + delta } : m)))
+          }
+        } catch {}
+      }
+      buffer = lines[lines.length - 1]
+    }
+  }
 
+  const send = async () => {
+    // allow sending if there is text OR there are files
+    if (!inputValue.trim() && attachments.length === 0) return
+
+    // show the user's text message if present
+    let userMessage: Message | null = null
+    if (inputValue.trim()) {
+      userMessage = { id: Date.now().toString(), content: inputValue, sender: "user", timestamp: new Date() }
+      setMessages((p) => [...p, userMessage!])
+      setInputValue("")
+    }
+
+    setIsTyping(true)
     const assistantId = (Date.now() + 1).toString()
     setMessages((p) => [...p, { id: assistantId, content: "", sender: "assistant", timestamp: new Date() }])
 
     try {
-      // Route is chosen by selected model (fallback to tier, then old route)
-      const path =
-        MODEL_TO_ROUTE[model] ??
-        (tier === "plus" ? "/api/chat/plus" : "/api/chat")
+      // If in /chat/plus AND we have attachments → send multipart
+      if (inPlus && attachments.length > 0) {
+        const form = new FormData()
+        form.append("model", model)
+        form.append("contextMode", "system")
+        // include history + the new user message (if any)
+        const history = userMessage ? [...messages, userMessage] : messages
+        form.append("messages", JSON.stringify(toOpenAIMessages(history)))
+        attachments.forEach((f) => form.append("files", f, f.name))
 
-      const res = await fetch(path, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: toOpenAIMessages([...messages, userMessage]),
-          model, // always pass through the chosen model
-        }),
-      })
-
-      const contentType = res.headers.get("content-type") || ""
-
-      if (!res.ok) {
-        const errText = await res.text().catch(() => "")
-        setMessages((p) =>
-          p.map((m) =>
-            m.id === assistantId
-              ? { ...m, content: `❌ HTTP ${res.status}${errText ? `: ${errText}` : ""}` }
-              : m
-          )
-        )
-        setIsTyping(false)
-        return
+        const res = await fetch("/api/chat/plus", { method: "POST", body: form })
+        await streamInto(res, assistantId)
+        setAttachments([]) // clear after successful send
+      } else {
+        // fallback: plain JSON (no files)
+        const path = MODEL_TO_ROUTE[model] ?? (tier === "plus" ? "/api/chat/plus" : "/api/chat")
+        const history = userMessage ? [...messages, userMessage] : messages
+        const res = await fetch(path, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: toOpenAIMessages(history), model }),
+        })
+        await streamInto(res, assistantId)
       }
-
-      // Handle both SSE and non-SSE (plain text) responses
-      if (!contentType.includes("text/event-stream") || !res.body) {
-        const txt = await res.text().catch(() => "")
-        setMessages((p) =>
-          p.map((m) =>
-            m.id === assistantId
-              ? { ...m, content: txt || "⚠️ ไม่ได้รับสตรีมจากเซิร์ฟเวอร์" }
-              : m
-          )
-        )
-        setIsTyping(false)
-        return
-      }
-
-      // Parse SSE stream
-      const reader = res.body.getReader()
-      const decoder = new TextDecoder("utf-8")
-
-      let buffer = ""
-      while (true) {
-        const { value, done } = await reader.read()
-        if (done) break
-        buffer += decoder.decode(value, { stream: true })
-
-        const lines = buffer.split("\n")
-        for (let i = 0; i < lines.length - 1; i++) {
-          const ln = lines[i].trim()
-          if (!ln.startsWith("data:")) continue
-          const payload = ln.slice(5).trim()
-          if (payload === "[DONE]") continue
-          try {
-            const json = JSON.parse(payload)
-            const delta: string = json.choices?.[0]?.delta?.content ?? ""
-            if (delta) {
-              setMessages((p) =>
-                p.map((m) => (m.id === assistantId ? { ...m, content: (m.content ?? "") + delta } : m))
-              )
-            }
-          } catch {
-            // ignore per-line parse errors
-          }
-        }
-        buffer = lines[lines.length - 1]
-      }
-    } catch (e) {
-      console.error(e)
-      setMessages((p) =>
-        p.map((m) => (m.id === assistantId ? { ...m, content: "⚠️ มีปัญหาเชื่อมต่อสตรีม" } : m))
-      )
+    } catch {
+      setMessages((p) => p.map((m) => (m.id === assistantId ? { ...m, content: "⚠️ Connection issue." } : m)))
     } finally {
       setIsTyping(false)
     }
@@ -187,27 +159,15 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
   ]
 
   const ctxValue = useMemo<ChatContextType>(() => ({
-    messages,
-    isTyping,
-    inputValue,
-    setInputValue,
-    send,
-    tier,
-    setTier,
-    model,
-    setModel,
+    messages, isTyping, inputValue, setInputValue, send, tier, setTier, model, setModel,
   }), [messages, isTyping, inputValue, tier, model])
 
   return (
     <ChatContext.Provider value={ctxValue}>
-      {/* Leave space for sidebar on md+ */}
       <div className="h-full min-h-0 overflow-hidden md:pl-64">
         <ChatBar conversations={conversations} topOffset={navH} />
         <main className="h-full min-h-0 flex flex-col">
-          <div
-            className="flex-1 min-h-0 overflow-y-auto p-4 space-y-6"
-            style={{ paddingBottom: inputH + 16 }}
-          >
+          <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-6" style={{ paddingBottom: inputH + 16 }}>
             {children}
           </div>
 
@@ -215,8 +175,14 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
             value={inputValue}
             onChange={setInputValue}
             onSend={send}
-            disabled={!inputValue.trim() || isTyping}
+            // enable Send if there is text OR there are files
+            disabled={(!inputValue.trim() && attachments.length === 0) || isTyping}
             onHeightChange={setInputH}
+            showUpload={inPlus}
+            onUploadFiles={inPlus ? addAttachments : undefined}
+            uploadAccept=".txt,.md,.csv,.json,text/*,application/json"
+            attachments={attachments}
+            onRemoveAttachment={removeAttachmentAt}
           />
         </main>
       </div>

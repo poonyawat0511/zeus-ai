@@ -6,7 +6,7 @@ import { useChatUI } from "../layout"
 
 const MODEL_OPTIONS = [
   { key: "deepseek/deepseek-chat-v3.1", label: "Free Trial" },
-  { key: "openai/gpt-4o-mini", label: "E-Commerce Model" },
+  { key: "openai/gpt-4o-mini", label: "E-Commerce Model (Only Plus)" },
 ]
 
 export default function ModelSelector() {
