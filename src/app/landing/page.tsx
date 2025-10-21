@@ -160,7 +160,7 @@ export default function Landing() {
             <div className="relative order-first lg:order-last mt-8 lg:mt-0">
               <div className="relative  z-10">
                 <img
-                  src="/modern-smartphone-mockup-with-ai-chat-interface-ye.jpg"
+                  src="https://media.tenor.com/lNU6yC7KEWAAAAAM/cat.gif"
                   alt="Zeus AI Mobile App"
                   className="mx-auto w-full rounded-xl max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl h-auto object-contain"
                 />
@@ -171,8 +171,8 @@ export default function Landing() {
       </section>
 
       {/* Services Section */}
-      <section className="min-h-dvh flex items-center bg-white" id="services">
-        <div className="container mx-auto px-4">
+      <section className="min-h-dvh flex items-center  bg-white" id="services">
+        <div className="container mx-auto px-4 py-7">
           <h1 className="text-4xl font-bold text-center text-gray-900 mb-12">
             ศักยภาพ AI
           </h1>
@@ -182,7 +182,7 @@ export default function Landing() {
           </h2>
 
           {/* Grid 3 cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <div className="grid md:grid-cols-3  gap-6 mb-8">
             {services.slice(0, 3).map((srv, idx) => (
               <ServiceCard
                 key={idx}
@@ -212,7 +212,9 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">ZEUS.AI</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4 py-4">
+                ZEUS.AI
+              </h2>
               <p className="text-xl text-gray-600">
                 ช่วยให้ทุกคนสามารถเติบการขายของคุณ
               </p>
@@ -225,7 +227,7 @@ export default function Landing() {
               {/* Workflow diagram */}
               <div className="grid md:grid-cols-4 gap-8 items-center">
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4 ">
                     <Users className="w-10 h-10 text-white" />
                   </div>
                   <h3 className="font-bold text-gray-900 mb-2">Engage</h3>
@@ -255,11 +257,11 @@ export default function Landing() {
                 </div>
 
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4 ">
                     <Zap className="w-10 h-10 text-white" />
                   </div>
                   <h3 className="font-bold text-gray-900 mb-2">Retarget</h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 py-4">
                     หาลูกค้าเก่า กลับมาซื้อสินค้าใหม่
                   </p>
                 </div>
@@ -279,12 +281,14 @@ export default function Landing() {
       </section>
 
       {/* Package Grid */}
-      <section className="container mx-auto px-4 py-16" id="packages">
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+  {/* Package Grid */}
+      <section className="container mx-auto px-4 py-10 sm:py-12 md:py-16" id="packages">
+        <h2 className="text-2xl font-bold text-center text-gray-900 mb-8 md:text-3xl md:mb-12">
           ราคาแพ็กเกจ
         </h2>
 
-        <div className="mt-5 grid md:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center">
+        {/* Responsive Grid for Packages */}
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {packages.map((p, i) => (
             <PackageCard
               key={i}
@@ -299,24 +303,25 @@ export default function Landing() {
           ))}
         </div>
 
-        <div className="mt-5 w-full max-w-6xl mx-auto">
+        <div className="mt-8 w-full max-w-6xl mx-auto">
           <Link href="/packages">
-            <Button className="w-full bg-yellow-400">ดูแพ็กเกจอื่นๆ</Button>
+            <Button className="w-full bg-yellow-400 font-bold">ดูแพ็กเกจอื่นๆ</Button>
           </Link>
         </div>
       </section>
 
       {/* Comment Grid */}
-      <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+      <section className="container mx-auto px-4 py-10 sm:py-12 md:py-16">
+        <h2 className="text-2xl font-bold text-center text-gray-900 mb-4 md:text-3xl">
           คอมเมนท์จากผู้ใช้งานจริง
         </h2>
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-12">
+        <p className="text-md text-center text-gray-700 mb-8 md:text-xl md:mb-12">
           มาดูกันว่าองค์กรทั่วเอเชียตะวันออกเฉียงใต้กำลังพลิกโฉมธุรกิจด้วย
           Zeus.AI อย่างไร
-        </h2>
+        </p>
 
-        <div className="mt-5 grid md:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center">
+        {/* Responsive Grid for Comments */}
+        <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {comments.map((c, i) => (
             <CommentCard
               key={i}
@@ -329,20 +334,21 @@ export default function Landing() {
           ))}
         </div>
 
-        <div className="mt-5 w-full">
-          <Card className="bg-gray-900 p-2">
-            <CardHeader className="flex-col">
-              <h2 className="text-2xl font-bold text-center text-white mb-12">
+        {/* Responsive Call-to-Action Card */}
+        <div className="mt-12 w-full">
+          <Card className="bg-gray-900 p-6 sm:p-8">
+            <CardHeader className="flex-col items-center">
+              <h2 className="text-xl font-bold text-center text-white mb-4 md:text-2xl">
                 พร้อมยกระดับธุรกิจของคุณหรือยัง?
               </h2>
-              <h2 className="text-xl font-bold text-center text-white mb-12">
+              <p className="text-lg font-normal text-center text-gray-300 mb-6 md:text-xl md:mb-8">
                 ธุรกิจนับพันได้เลือกใช้ Zeus.AI
                 เพื่อสร้างประสบการณ์ลูกค้าที่โดดเด่น
-              </h2>
+              </p>
             </CardHeader>
             <CardBody>
-              <Link href="/chat" className="block w-full">
-                <Button className="w-full bg-yellow-400">ทดลองใช้งานฟรี</Button>
+              <Link href="/chat" className="block w-full max-w-xs mx-auto">
+                <Button className="w-full bg-yellow-400 font-bold">ทดลองใช้งานฟรี</Button>
               </Link>
             </CardBody>
           </Card>
